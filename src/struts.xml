@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<!-- 配置常量,将struts对象交给spring管理 -->
+	<constant name="struts.objectFactory" value="spring"></constant>
+	
+	<package name="crm" namespace="/" extends="struts-default">
+		<action name="customerAction_*" class="CustomerAction" method="{1}"> 
+			<result name="edit">/jsp/customer/add.jsp</result>
+			<result name="list">/jsp/customer/list.jsp</result>
+			<result name="toList" type="redirectAction">
+				<param name="actionName">customerAction_list</param>
+				<param name="namespace">/</param>
+			</result>
+			<result name="error">error.jsp</result>
+		</action>
+		
+		<action name="baseDictAction" class="baseDictAction" method="execute"></action>
+		
+		<action name="linkManAction_*" class="linkManAction" method="{1}">
+			<result name="list">/jsp/linkman/list.jsp</result>
+			<result name="toList" type="redirectAction">
+				<param name="actionName">linkManAction_list</param>
+				<param name="namespace">/</param>
+			</result>
+		</action>
+	</package>
+	
+</struts>

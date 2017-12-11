@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+	
+	<!-- spring 读取db.properties文件 -->
+	<context:property-placeholder location="classpath:db.properties"/>
+	
+	<!-- spring配置c3p0对象 -->
+	<bean name="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	
+	<!-- 在spring中配置hibernate的配置信息  配置sessionFactory对象-->
+	<bean name="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="hibernateProperties">
+			<props>
+				<!-- 方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				
+				<!-- 打印sql语句 并格式化 -->
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				
+				<!-- 自动导出表 -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<!-- 引入orm元数据  指定orm元数据所在的包 spring会自动读取指定包下的所有orm元数据文件 -->
+		<property name="mappingDirectoryLocations" value="classpath:com/gofar/domain"></property>
+	</bean>
+	
+		<!-- 配置核心事务管理器 -->
+	<bean name="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+		<!-- 开启事务注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+		
+	<!-- spring 整合struts2 -->
+	<!-- action action 的作用域范围一定是多例的  scope:prototype -->
+	<bean name="CustomerAction" class="com.gofar.web.action.CustomerAction" scope="prototype">
+		<property name="cs" ref="customerService"></property>
+	</bean>
+	<bean name="baseDictAction" class="com.gofar.web.action.BaseDictAction" scope="prototype">
+		<property name="bds" ref="baseDictService"></property>
+	</bean>
+	<bean name="linkManAction" class="com.gofar.web.action.LinkManAction">
+		<property name="lms" ref="linkManService"></property>
+	</bean>
+	
+	
+	<!-- Service -->
+	<bean name="customerService" class="com.gofar.service.impl.CustomerServiceImpl">
+		<property name="cd" ref="customerDao"></property>
+	</bean>
+	<bean name="baseDictService" class="com.gofar.service.impl.BaseDictServiceImpl">
+		<property name="bdd" ref="baseDictDao"></property>
+	</bean>
+	<bean name="linkManService" class="com.gofar.service.impl.LinkManServiceImpl">
+		<property name="lkd" ref="linkManDao"></property>
+	</bean>
+	
+	
+	<!-- Dao -->
+	<bean name="customerDao" class="com.gofar.dao.impl.CustomerDaoImpl">
+	<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<bean name="baseDictDao" class="com.gofar.dao.impl.BaseDictDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<bean name="linkManDao" class="com.gofar.dao.impl.LinkManDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+</beans>
